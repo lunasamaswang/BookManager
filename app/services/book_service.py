@@ -70,6 +70,41 @@ def get_books(keyword=""):
     return [dict(row) for row in rows]
 
 
+def get_book_statistics():
+    """返回首页需要的基础统计数据。"""
+    with get_connection() as connection:
+        row = connection.execute(
+            """
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN status = '已借出' THEN 1 ELSE 0 END) AS borrowed
+            FROM books
+            """
+        ).fetchone()
+
+    return {
+        "total": row["total"] or 0,
+        "borrowed": row["borrowed"] or 0,
+    }
+
+
+def get_recent_books(limit=5):
+    """按添加顺序返回最近的图书，默认取 5 本。"""
+    safe_limit = max(0, int(limit))
+    with get_connection() as connection:
+        rows = connection.execute(
+            """
+            SELECT id, nfc_id, title, author, category, location, status, created_at
+            FROM books
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (safe_limit,),
+        ).fetchall()
+
+    return [dict(row) for row in rows]
+
+
 def get_book(book_id):
     """根据图书编号查询单本图书，不存在时返回 None。"""
     with get_connection() as connection:
