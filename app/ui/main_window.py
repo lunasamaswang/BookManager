@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("BookManager 智能书房")
         self.resize(1440, 820)
-        self.setMinimumSize(1180, 680)
+        self.setMinimumSize(1240, 720)
         self.current_page_key = "home"
         self.nav_buttons = {}
         self.setup_ui()
@@ -83,7 +83,7 @@ class MainWindow(QMainWindow):
         title = QLabel("BookManager")
         title.setObjectName("appTitle")
 
-        subtitle = QLabel("你的智能书房")
+        subtitle = QLabel("智能书房控制中心")
         subtitle.setObjectName("appSubtitle")
 
         brand_text_layout = QVBoxLayout()
@@ -91,7 +91,10 @@ class MainWindow(QMainWindow):
         brand_text_layout.addWidget(title)
         brand_text_layout.addWidget(subtitle)
 
-        brand_layout = QHBoxLayout()
+        brand_area = QFrame()
+        brand_area.setObjectName("sidebarBrandArea")
+        brand_layout = QHBoxLayout(brand_area)
+        brand_layout.setContentsMargins(0, 0, 0, 0)
         brand_layout.setSpacing(10)
         brand_layout.addWidget(brand_mark)
         brand_layout.addLayout(brand_text_layout)
@@ -116,18 +119,30 @@ class MainWindow(QMainWindow):
             self.nav_buttons[key] = button
             nav_layout.addWidget(button)
 
-        footer = QLabel("BookManager v1.1.0\n本地数据 · 安心收藏")
+        footer_card = QFrame()
+        footer_card.setObjectName("sidebarProfileCard")
+
+        footer_status = QLabel("●  本地数据已连接")
+        footer_status.setObjectName("sidebarStatus")
+
+        footer = QLabel("BookManager v1.1.1\n安心收藏 · 离线可用")
         footer.setObjectName("sidebarFooter")
+
+        footer_layout = QVBoxLayout(footer_card)
+        footer_layout.setContentsMargins(12, 11, 12, 11)
+        footer_layout.setSpacing(4)
+        footer_layout.addWidget(footer_status)
+        footer_layout.addWidget(footer)
 
         layout = QVBoxLayout(sidebar)
         layout.setContentsMargins(18, 24, 18, 22)
         layout.setSpacing(18)
-        layout.addLayout(brand_layout)
+        layout.addWidget(brand_area)
         layout.addSpacing(10)
         layout.addWidget(nav_label)
         layout.addLayout(nav_layout)
         layout.addStretch()
-        layout.addWidget(footer)
+        layout.addWidget(footer_card)
         return sidebar
 
     def handle_navigation(self, page_key):

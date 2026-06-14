@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtCore import QEvent, QTimer, Signal, Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMessageBox,
     QPushButton,
+    QSizePolicy,
     QStackedLayout,
     QTableWidget,
     QTableWidgetItem,
@@ -32,6 +33,18 @@ class LibraryPage(QWidget):
 
     books_changed = Signal()
     success_message = Signal(str)
+
+    # 常见窗口宽度下优先保证操作列完整，其余列按可用空间伸缩。
+    MIN_COLUMN_WIDTHS = [48, 74, 84, 48, 52, 58, 68, 72, 152]
+    COLUMN_GROWTH_LIMITS = [
+        (2, 80),  # 书名优先获得空间
+        (5, 34),  # 存放位置
+        (7, 48),  # 添加时间
+        (1, 24),  # NFC 编号
+        (3, 28),  # 作者
+        (4, 16),  # 分类
+        (6, 12),  # 状态
+    ]
 
     TABLE_COLUMNS = [
         ("id", "编号"),
@@ -66,20 +79,26 @@ class LibraryPage(QWidget):
 
         add_button = QPushButton("添加图书")
         add_button.setObjectName("primaryButton")
+        add_button.setMinimumWidth(104)
         add_button.setToolTip("添加一本新图书")
         add_button.clicked.connect(self.open_add_dialog)
 
         self.import_button = QPushButton("导入 Excel")
         self.import_button.setObjectName("secondaryButton")
+        self.import_button.setMinimumWidth(112)
         self.import_button.setToolTip("从 Excel 文件批量导入图书")
         self.import_button.clicked.connect(self.open_excel_import)
 
         title_layout = QHBoxLayout()
         title_layout.setSpacing(10)
-        title_layout.addLayout(title_text_layout)
+        title_layout.addLayout(title_text_layout, 1)
         title_layout.addStretch()
         title_layout.addWidget(self.import_button)
         title_layout.addWidget(add_button)
+
+        header = QFrame()
+        header.setObjectName("libraryHeader")
+        header.setLayout(title_layout)
 
         self.search_input = QLineEdit()
         self.search_input.setObjectName("searchInput")
@@ -87,6 +106,10 @@ class LibraryPage(QWidget):
         self.search_input.setClearButtonEnabled(True)
         self.search_input.setMinimumWidth(300)
         self.search_input.setMaximumWidth(420)
+        self.search_input.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed,
+        )
         self.search_input.addAction(
             QIcon(str(ASSETS_DIR / "search.svg")),
             QLineEdit.ActionPosition.LeadingPosition,
@@ -94,8 +117,13 @@ class LibraryPage(QWidget):
         self.search_input.textChanged.connect(self.load_books)
 
         search_layout = QHBoxLayout()
+        search_layout.setContentsMargins(16, 12, 16, 12)
         search_layout.addWidget(self.search_input)
         search_layout.addStretch()
+
+        search_panel = QFrame()
+        search_panel.setObjectName("librarySearchPanel")
+        search_panel.setLayout(search_layout)
 
         table_card = QFrame()
         table_card.setObjectName("tableCard")
@@ -106,6 +134,7 @@ class LibraryPage(QWidget):
         self.table_stack = QStackedLayout()
         self.table_stack.setContentsMargins(0, 0, 0, 0)
         self.book_table = self.create_book_table()
+        self.book_table.viewport().installEventFilter(self)
         self.empty_state = self.create_empty_state()
         self.table_stack.addWidget(self.book_table)
         self.table_stack.addWidget(self.empty_state)
@@ -114,8 +143,8 @@ class LibraryPage(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(28, 26, 28, 28)
         layout.setSpacing(16)
-        layout.addLayout(title_layout)
-        layout.addLayout(search_layout)
+        layout.addWidget(header)
+        layout.addWidget(search_panel)
         layout.addWidget(table_card, 1)
 
     def create_book_table(self):
@@ -132,26 +161,70 @@ class LibraryPage(QWidget):
         table.setAlternatingRowColors(False)
         table.setShowGrid(False)
         table.setWordWrap(False)
+        table.setHorizontalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel
+        )
+        table.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        table.setVerticalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel
+        )
+        table.setTextElideMode(Qt.TextElideMode.ElideRight)
         table.verticalHeader().setVisible(False)
-        table.verticalHeader().setDefaultSectionSize(48)
+        table.verticalHeader().setDefaultSectionSize(52)
 
         header = table.horizontalHeader()
         header.setDefaultAlignment(
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         )
         header.setMinimumSectionSize(48)
-        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        header.setStretchLastSection(False)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
-        table.setColumnWidth(0, 52)
-        table.setColumnWidth(1, 100)
-        table.setColumnWidth(3, 90)
-        table.setColumnWidth(4, 76)
-        table.setColumnWidth(5, 90)
-        table.setColumnWidth(6, 82)
-        table.setColumnWidth(7, 120)
-        table.setColumnWidth(8, 128)
+        for column, width in enumerate(self.MIN_COLUMN_WIDTHS):
+            table.setColumnWidth(column, width)
         return table
+
+    def eventFilter(self, watched, event):
+        """表格可视区域变化后重新计算列宽，避免最右侧操作列被裁切。"""
+        if (
+            hasattr(self, "book_table")
+            and watched is self.book_table.viewport()
+            and event.type() == QEvent.Type.Resize
+        ):
+            QTimer.singleShot(0, self.update_table_column_widths)
+        return super().eventFilter(watched, event)
+
+    def resizeEvent(self, event):
+        """窗口尺寸变化时同步调整表格列宽。"""
+        super().resizeEvent(event)
+        QTimer.singleShot(0, self.update_table_column_widths)
+
+    def update_table_column_widths(self):
+        """按表格可视宽度分配列宽，并始终保留完整操作列。"""
+        viewport_width = self.book_table.viewport().width()
+        if viewport_width <= 0:
+            return
+
+        widths = self.MIN_COLUMN_WIDTHS.copy()
+        minimum_total = sum(widths)
+        target_width = max(viewport_width, minimum_total)
+        remaining = target_width - minimum_total
+
+        for column, growth_limit in self.COLUMN_GROWTH_LIMITS:
+            growth = min(remaining, growth_limit)
+            widths[column] += growth
+            remaining -= growth
+            if remaining == 0:
+                break
+
+        # 更宽的窗口把剩余空间继续交给书名列。
+        if remaining > 0:
+            widths[2] += remaining
+
+        for column, width in enumerate(widths):
+            self.book_table.setColumnWidth(column, width)
 
     def create_empty_state(self):
         """创建无数据和无搜索结果时显示的提示区域。"""
@@ -233,11 +306,13 @@ class LibraryPage(QWidget):
             )
             self.table_stack.setCurrentWidget(self.empty_state)
 
+        QTimer.singleShot(0, self.update_table_column_widths)
+
     def create_status_badge(self, status):
         """创建带文字的状态徽标。"""
         widget = QWidget()
         layout = QHBoxLayout(widget)
-        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setContentsMargins(6, 8, 6, 8)
 
         label = QLabel(status)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -252,11 +327,12 @@ class LibraryPage(QWidget):
         """为每一行创建编辑和删除按钮。"""
         widget = QWidget()
         layout = QHBoxLayout(widget)
-        layout.setContentsMargins(6, 6, 6, 6)
-        layout.setSpacing(8)
+        layout.setContentsMargins(5, 6, 5, 6)
+        layout.setSpacing(6)
 
         edit_button = QPushButton("编辑")
         edit_button.setObjectName("tableActionButton")
+        edit_button.setMinimumWidth(52)
         edit_button.setToolTip("编辑这本图书")
         edit_button.clicked.connect(
             lambda checked=False, current_id=book_id: self.open_edit_dialog(current_id)
@@ -264,6 +340,7 @@ class LibraryPage(QWidget):
 
         delete_button = QPushButton("删除")
         delete_button.setObjectName("dangerButton")
+        delete_button.setMinimumWidth(52)
         delete_button.setToolTip("永久删除这本图书")
         delete_button.clicked.connect(
             lambda checked=False, current_id=book_id: self.confirm_delete(current_id)
