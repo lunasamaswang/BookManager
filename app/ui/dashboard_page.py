@@ -147,6 +147,29 @@ class DashboardPage(QWidget):
         total_badge = QLabel("实时统计")
         total_badge.setObjectName("totalStatBadge")
 
+        analysis_ring = QFrame()
+        analysis_ring.setObjectName("readingAnalysisRing")
+        analysis_ring.setFixedSize(42, 42)
+        analysis_ring_core = QFrame(analysis_ring)
+        analysis_ring_core.setObjectName("readingAnalysisRingCore")
+        analysis_ring_core.setGeometry(9, 9, 24, 24)
+
+        analysis_title = QLabel("阅读状态分析")
+        analysis_title.setObjectName("readingAnalysisTitle")
+        analysis_description = QLabel("将在阅读记录功能开放后自动生成")
+        analysis_description.setObjectName("readingAnalysisDescription")
+        analysis_description.setWordWrap(True)
+
+        analysis_text_layout = QVBoxLayout()
+        analysis_text_layout.setSpacing(2)
+        analysis_text_layout.addWidget(analysis_title)
+        analysis_text_layout.addWidget(analysis_description)
+
+        analysis_layout = QHBoxLayout()
+        analysis_layout.setSpacing(10)
+        analysis_layout.addWidget(analysis_ring)
+        analysis_layout.addLayout(analysis_text_layout, 1)
+
         total_header = QHBoxLayout()
         total_header.addWidget(total_icon)
         total_header.addStretch()
@@ -159,6 +182,8 @@ class DashboardPage(QWidget):
         total_layout.addWidget(total_title)
         total_layout.addWidget(total_value)
         total_layout.addWidget(total_description)
+        total_layout.addSpacing(4)
+        total_layout.addLayout(analysis_layout)
         self.stat_values["total"] = total_value
 
         small_grid = QGridLayout()

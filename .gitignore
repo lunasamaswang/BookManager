@@ -12,3 +12,15 @@ validation/
 
 *.db
 data/books.db
+
+# 仅保存在本地的开发文档与资料
+local_docs/
+private_docs/
+docs_local/
+
+# 临时截图（正式素材与文档图片不受影响）
+screenshots_temp/
+*.tmp.png
+screenshot_*.png
+*_screenshot.png
+屏幕截图*.png

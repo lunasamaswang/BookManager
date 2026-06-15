@@ -125,7 +125,7 @@ class MainWindow(QMainWindow):
         footer_status = QLabel("●  本地数据已连接")
         footer_status.setObjectName("sidebarStatus")
 
-        footer = QLabel("BookManager v1.1.1\n安心收藏 · 离线可用")
+        footer = QLabel("BookManager v1.1.2\n安心收藏 · 离线可用")
         footer.setObjectName("sidebarFooter")
 
         footer_layout = QVBoxLayout(footer_card)

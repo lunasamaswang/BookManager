@@ -1,7 +1,7 @@
 * {
     font-family: "Microsoft YaHei UI", "Segoe UI", sans-serif;
     font-size: 14px;
-    color: #243447;
+    color: #2c2c2c;
 }
 
 QMainWindow,
@@ -11,13 +11,19 @@ QDialog,
 #libraryPage,
 #dashboardPage,
 #dashboardContent {
-    background-color: #f6f1e8;
+    background-color: #f3ecdf;
 }
 
-/* 左侧智能书房导航 */
+/* 左侧胡桃木书房导航 */
 #sidebar {
-    background-color: #122033;
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 1,
+        stop: 0 #2f1d14,
+        stop: 0.52 #43291b,
+        stop: 1 #2a1a12
+    );
     border: none;
+    border-right: 1px solid #6b4931;
 }
 
 #sidebarBrandArea {
@@ -29,91 +35,92 @@ QDialog,
     max-width: 40px;
     min-height: 40px;
     max-height: 40px;
-    color: #fffaf0;
-    background-color: #b67a42;
-    border: 1px solid #cf9961;
+    color: #fff9ed;
+    background-color: #a96f3d;
+    border: 1px solid #d2a064;
     border-radius: 12px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     qproperty-alignment: AlignCenter;
 }
 
 #appTitle {
-    color: #fffdf8;
-    font-size: 17px;
-    font-weight: 700;
+    color: #fff8ea;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 #appSubtitle {
-    color: #aeb9c7;
-    font-size: 11px;
+    color: #d0bda6;
+    font-size: 12px;
 }
 
 #navSectionTitle {
-    color: #718197;
-    font-size: 11px;
+    color: #aa9077;
+    font-size: 12px;
     font-weight: 600;
 }
 
 #navButton {
     min-height: 40px;
-    padding: 0 14px 0 16px;
-    color: #c9d1dc;
+    padding: 0 16px;
+    color: #e2d4c3;
     background-color: transparent;
     border: 1px solid transparent;
-    border-radius: 9px;
+    border-radius: 10px;
     text-align: left;
     font-weight: 500;
 }
 
 #navButton:hover {
-    color: #fffdf8;
-    background-color: #1d3047;
+    color: #fffaf1;
+    background-color: rgba(222, 184, 130, 0.13);
+    border-color: rgba(222, 184, 130, 0.16);
 }
 
 #navButton:pressed {
     color: #ffffff;
-    background-color: #263a51;
+    background-color: rgba(224, 177, 111, 0.20);
 }
 
 #navButton:checked {
-    color: #fffaf1;
-    background-color: rgba(255, 248, 235, 0.13);
-    border: 1px solid rgba(230, 184, 92, 0.38);
-    font-weight: 650;
+    color: #3b271a;
+    background-color: #e6c99d;
+    border: 1px solid #f0d8ad;
+    font-weight: 600;
 }
 
 #navButton:focus {
-    border: 1px solid #e6b85c;
+    border: 1px solid #e8b766;
 }
 
 #sidebarProfileCard {
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 10px;
+    background-color: rgba(255, 247, 232, 0.08);
+    border: 1px solid rgba(234, 201, 153, 0.16);
+    border-radius: 12px;
 }
 
 #sidebarStatus {
-    color: #9fc3a5;
-    font-size: 11px;
+    color: #b9d3ad;
+    font-size: 12px;
     font-weight: 600;
 }
 
 #sidebarFooter {
-    color: #8290a2;
-    font-size: 10px;
+    color: #b39c85;
+    font-size: 12px;
 }
 
 /* 页面与欢迎区 */
 #pageTitle {
-    color: #1f2d3d;
-    font-size: 25px;
-    font-weight: 700;
+    color: #2c2c2c;
+    font-size: 22px;
+    font-weight: 600;
 }
 
 #pageSubtitle,
 #dialogDescription {
-    color: #7a746b;
+    color: #6b6b6b;
     font-size: 13px;
 }
 
@@ -123,30 +130,31 @@ QDialog,
 }
 
 #dashboardScroll > QWidget > QWidget {
-    background-color: #f6f1e8;
+    background-color: #f3ecdf;
 }
 
 #welcomeSection {
-    background-color: #fbf2e3;
-    border: 1px solid #e4cda9;
-    border-radius: 16px;
+    background-color: #fffdf7;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid #d7b36a;
+    border-radius: 12px;
 }
 
 #welcomeHint {
-    color: #a67645;
-    font-size: 10px;
-    font-weight: 700;
+    color: #9a9a9a;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 #dashboardWelcome {
-    color: #1f2d3d;
-    font-size: 27px;
-    font-weight: 700;
+    color: #2c2c2c;
+    font-size: 22px;
+    font-weight: 600;
     min-height: 38px;
 }
 
 #dashboardSubtitle {
-    color: #7a746b;
+    color: #6b6b6b;
     font-size: 13px;
     min-height: 22px;
 }
@@ -165,19 +173,19 @@ QDialog,
 #recentBooksCard,
 #taskCard,
 #roomStatusCard {
-    background-color: #fffdf8;
-    border: none;
-    border-bottom: 2px solid #e4ddd2;
-    border-radius: 14px;
+    background-color: #fffdf7;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
 }
 
 #statCardTotal {
-    min-height: 142px;
-    background-color: #f4f8ef;
-    border: 1px solid #bfd0b9;
-    border-left: 5px solid #5f8d6a;
-    border-bottom: 3px solid #b9cbb4;
-    border-radius: 16px;
+    min-height: 196px;
+    background-color: #fffdf7;
+    border: 1px solid #d7b36a;
+    border-left: 1px solid #d7b36a;
+    border-bottom: 1px solid #d7b36a;
+    border-radius: 12px;
 }
 
 #statCardReading,
@@ -186,7 +194,7 @@ QDialog,
 #statCardPending {
     min-width: 150px;
     min-height: 62px;
-    border-bottom: 2px solid #e6dfd5;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 #statIconTotal,
@@ -200,7 +208,7 @@ QDialog,
     max-height: 38px;
     border-radius: 19px;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     qproperty-alignment: AlignCenter;
 }
 
@@ -210,9 +218,9 @@ QDialog,
     min-height: 54px;
     max-height: 54px;
     border-radius: 27px;
-    color: #447251;
-    background-color: #dbe9d9;
-    font-size: 17px;
+    color: #4b674d;
+    background-color: #dce8d3;
+    font-size: 18px;
 }
 
 #statIconReading {
@@ -236,82 +244,107 @@ QDialog,
 }
 
 #statTitle {
-    color: #746e66;
+    color: #6b6b6b;
     font-size: 12px;
     font-weight: 600;
     min-height: 18px;
 }
 
 #statValue {
-    color: #1f2d3d;
-    font-size: 23px;
-    font-weight: 700;
+    color: #2c2c2c;
+    font-size: 22px;
+    font-weight: 600;
 }
 
 #statDescription {
-    color: #9a9389;
-    font-size: 10px;
+    color: #9a9a9a;
+    font-size: 12px;
     min-height: 16px;
 }
 
 #totalStatTitle {
-    color: #52715a;
-    font-size: 14px;
-    font-weight: 700;
+    color: #2c2c2c;
+    font-size: 16px;
+    font-weight: 500;
 }
 
 #totalStatValue {
-    color: #243d2b;
-    font-size: 42px;
-    font-weight: 750;
+    color: #2c2c2c;
+    font-size: 22px;
+    font-weight: 600;
 }
 
 #totalStatDescription {
-    color: #6f7e70;
-    font-size: 11px;
+    color: #6b6b6b;
+    font-size: 12px;
     min-height: 18px;
 }
 
 #totalStatBadge {
     max-width: 62px;
     min-height: 24px;
-    color: #52715a;
-    background-color: #e2eddf;
+    color: #526b54;
+    background-color: #e1ebda;
     border-radius: 12px;
-    font-size: 10px;
-    font-weight: 650;
+    font-size: 12px;
+    font-weight: 600;
     qproperty-alignment: AlignCenter;
 }
 
+#readingAnalysisRing {
+    background-color: #ead7b6;
+    border: 2px solid #c79b61;
+    border-radius: 21px;
+}
+
+#readingAnalysisRingCore {
+    background-color: #f2f6eb;
+    border: 1px solid #d4bd94;
+    border-radius: 12px;
+}
+
+#readingAnalysisTitle {
+    color: #2c2c2c;
+    font-size: 12px;
+    font-weight: 600;
+    min-height: 18px;
+}
+
+#readingAnalysisDescription {
+    color: #9a9a9a;
+    font-size: 12px;
+    min-height: 16px;
+}
+
 #cardTitle {
-    color: #243447;
+    color: #2c2c2c;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 #cardDescription,
 #recentEmpty {
-    color: #817a70;
+    color: #6b6b6b;
     font-size: 12px;
     min-height: 20px;
 }
 
 #quickSearchCard {
-    background-color: #fffaf1;
-    border: 1px solid #dfc49b;
-    border-left: 5px solid #e0ae58;
-    border-bottom: 3px solid #dbc19b;
-    border-radius: 16px;
+    background-color: #fffdf7;
+    border: 1px solid #d7b36a;
+    border-left: 1px solid #d7b36a;
+    border-bottom: 1px solid #d7b36a;
+    border-radius: 12px;
 }
 
 #taskCard {
-    background-color: #fffdf9;
+    background-color: #fffdf7;
 }
 
 #roomStatusCard {
-    background-color: #f3f6f3;
-    border-left: 4px solid #6f9775;
-    border-bottom-color: #d2ddd1;
+    background-color: #fffdf7;
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom-color: rgba(0, 0, 0, 0.06);
 }
 
 #taskBadge {
@@ -320,50 +353,50 @@ QDialog,
     color: #52755b;
     background-color: #e4efe4;
     border-radius: 11px;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
     qproperty-alignment: AlignCenter;
 }
 
 #searchHeroTitle {
-    color: #1f2d3d;
+    color: #2c2c2c;
     font-size: 20px;
-    font-weight: 750;
+    font-weight: 600;
 }
 
 #searchHeroDescription {
-    color: #81766a;
+    color: #6b6b6b;
     font-size: 12px;
 }
 
 #quickFilterLabel {
-    color: #918779;
-    font-size: 11px;
+    color: #9a9a9a;
+    font-size: 12px;
 }
 
 #quickFilterButton {
     min-width: 68px;
     min-height: 26px;
-    padding: 0 10px;
-    color: #685d50;
-    background-color: #f3eadc;
-    border: 1px solid #dfcfb9;
+    padding: 0 12px;
+    color: #2c2c2c;
+    background-color: #f1e2cd;
+    border: 1px solid #d9bd98;
     border-radius: 13px;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 #quickFilterButton:hover {
-    color: #243447;
-    background-color: #e9dcc8;
-    border-color: #c9b18f;
+    color: #3d291c;
+    background-color: #e7d0ae;
+    border-color: #bf9563;
 }
 
 #taskItem {
     min-height: 58px;
-    background-color: #fbf8f2;
+    background-color: #fffdf7;
     border: none;
     border-bottom: 1px solid #eee6da;
-    border-radius: 7px;
+    border-radius: 12px;
 }
 
 #taskMarkerGold,
@@ -386,15 +419,15 @@ QDialog,
 }
 
 #taskItemTitle {
-    color: #364453;
-    font-size: 12px;
-    font-weight: 650;
+    color: #2c2c2c;
+    font-size: 13px;
+    font-weight: 500;
     min-height: 18px;
 }
 
 #taskItemDescription {
-    color: #91897f;
-    font-size: 10px;
+    color: #9a9a9a;
+    font-size: 12px;
     min-height: 16px;
 }
 
@@ -403,23 +436,23 @@ QDialog,
     max-width: 52px;
     min-height: 30px;
     padding: 0;
-    color: #665d52;
-    background-color: #fffdf8;
+    color: #2c2c2c;
+    background-color: #f1e2cd;
     border: 1px solid #d9cbb9;
-    border-radius: 7px;
-    font-size: 10px;
+    border-radius: 10px;
+    font-size: 12px;
 }
 
 #taskActionButton:hover {
     color: #ffffff;
-    background-color: #14243a;
-    border-color: #14243a;
+    background-color: #48634b;
+    border-color: #48634b;
 }
 
 #roomOnlineStatus {
     color: #4f7d59;
-    font-size: 10px;
-    font-weight: 650;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 #roomStatusRow {
@@ -430,13 +463,13 @@ QDialog,
 
 #roomStatusLabel {
     min-width: 64px;
-    color: #69756a;
-    font-size: 11px;
+    color: #6b6b6b;
+    font-size: 12px;
 }
 
 #roomStatusValue {
-    color: #455347;
-    font-size: 10px;
+    color: #2c2c2c;
+    font-size: 12px;
     font-weight: 600;
     min-height: 18px;
 }
@@ -447,23 +480,23 @@ QDialog,
 }
 
 #recentBookTitle {
-    color: #2a3949;
+    color: #2c2c2c;
     font-size: 13px;
     font-weight: 600;
 }
 
 #recentBookMeta {
-    color: #8a8378;
-    font-size: 11px;
+    color: #6b6b6b;
+    font-size: 12px;
 }
 
 #recentAvailableStatus,
 #recentBorrowedStatus {
     min-width: 48px;
     min-height: 22px;
-    padding: 0 7px;
+    padding: 0 8px;
     border-radius: 11px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     qproperty-alignment: AlignCenter;
 }
@@ -480,8 +513,8 @@ QDialog,
 
 /* 右侧 BookBot */
 #bookbotPanel {
-    background-color: #f8f2e8;
-    border-left: 1px solid #e3d8c9;
+    background-color: #f5ecdf;
+    border-left: 1px solid #d9c4a8;
 }
 
 #bookbotHeader {
@@ -500,18 +533,18 @@ QDialog,
     color: #5f9a6b;
     background-color: #e9f3e8;
     border-radius: 9px;
-    font-size: 9px;
+    font-size: 12px;
 }
 
 #bookbotTitle {
-    color: #243447;
+    color: #2c2c2c;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 #bookbotSubtitle {
-    color: #64816a;
-    font-size: 10px;
+    color: #6b6b6b;
+    font-size: 12px;
     min-height: 18px;
 }
 
@@ -522,46 +555,46 @@ QDialog,
 }
 
 #bookbotSpeechBubble {
-    background-color: #fffdf8;
-    border: 1px solid #e4d5c1;
-    border-left: 4px solid #e6b85c;
-    border-bottom: 2px solid #ded0bc;
+    background-color: #fffdf7;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 #bookbotReminderCard {
-    background-color: #eef5ec;
-    border: none;
-    border-left: 3px solid #5f8d6a;
+    background-color: #fffdf7;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 #bookbotBubbleTitle {
-    color: #7b5836;
-    font-size: 12px;
-    font-weight: 700;
+    color: #2c2c2c;
+    font-size: 13px;
+    font-weight: 500;
 }
 
 #bookbotBubbleText {
-    color: #5f5a54;
-    font-size: 12px;
+    color: #6b6b6b;
+    font-size: 13px;
     min-height: 36px;
 }
 
 #bookbotCardTitle {
-    color: #314052;
+    color: #2c2c2c;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 #bookbotText {
-    color: #746f67;
-    font-size: 12px;
+    color: #6b6b6b;
+    font-size: 13px;
     min-height: 38px;
 }
 
 #bookbotSectionTitle {
-    color: #8b8174;
-    font-size: 11px;
-    font-weight: 650;
+    color: #6b6b6b;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 #bookbotActions {
@@ -571,62 +604,64 @@ QDialog,
 #bookbotActionButton {
     min-width: 100px;
     min-height: 40px;
-    padding: 0 14px;
-    color: #4c473f;
-    background-color: #fffdf8;
-    border: none;
-    border-left: 3px solid #d8c4a7;
-    border-bottom: 1px solid #e4d9ca;
+    padding: 0 16px;
+    color: #2c2c2c;
+    background-color: #f1e2cd;
+    border: 1px solid #d9bd98;
+    border-left: 1px solid #d9bd98;
+    border-bottom: 1px solid #d9bd98;
     border-radius: 10px;
     text-align: left;
     font-weight: 600;
 }
 
 #bookbotActionButton:hover {
-    color: #243447;
-    background-color: #f5eadb;
-    border-color: #cfb691;
+    color: #2c2c2c;
+    background-color: #e7d0ae;
+    border-color: #c5964e;
 }
 
 #bookbotActionButton:pressed {
-    background-color: #eadbc7;
+    color: #2c2c2c;
+    background-color: #dcc49f;
+    border-color: #b98950;
 }
 
 #bookbotQuoteCard {
-    background-color: #f4e4c9;
-    border: none;
-    border-top: 5px solid #c8914e;
-    border-bottom: 3px solid #d2b182;
-    border-radius: 6px;
+    background-color: #fffdf7;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid #d7b36a;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
 }
 
 #bookmarkRibbon {
     max-width: 58px;
     min-height: 22px;
     color: #fffaf0;
-    background-color: #b9793f;
+    background-color: #9c6235;
     border-radius: 3px;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
     qproperty-alignment: AlignCenter;
 }
 
 #bookbotQuoteMark {
     color: #c08b4f;
     font-family: "Georgia", "Microsoft YaHei UI";
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 600;
 }
 
 #bookbotQuoteText {
-    color: #5e4d3c;
-    font-size: 12px;
+    color: #2c2c2c;
+    font-size: 13px;
     min-height: 42px;
 }
 
 #bookbotQuoteAuthor {
-    color: #967656;
-    font-size: 11px;
+    color: #6b6b6b;
+    font-size: 12px;
     min-height: 18px;
 }
 
@@ -636,27 +671,27 @@ QDialog,
 }
 
 #librarySearchPanel {
-    background-color: #fbf7ef;
-    border: 1px solid #e5d9c9;
-    border-radius: 11px;
+    background-color: #fffdf7;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
 }
 
 #tableCard {
-    background-color: #fffdf8;
-    border: 1px solid #e4dacc;
-    border-bottom: 2px solid #d9cdbd;
+    background-color: #fffdf7;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 12px;
 }
 
 /* 输入框与按钮 */
 QLineEdit,
 QComboBox {
-    min-height: 40px;
-    padding: 0 11px;
-    color: #243447;
-    background-color: #fffdf8;
+    min-height: 44px;
+    padding: 0 12px;
+    color: #2c2c2c;
+    background-color: #fffdf7;
     border: 1px solid #d8ccbc;
-    border-radius: 8px;
+    border-radius: 10px;
     selection-color: #ffffff;
     selection-background-color: #5f8d6a;
 }
@@ -668,7 +703,7 @@ QComboBox:hover {
 
 QLineEdit:focus,
 QComboBox:focus {
-    border: 1px solid #5f8d6a;
+    border: 1px solid #c5964e;
     background-color: #fffefb;
 }
 
@@ -680,10 +715,11 @@ QComboBox:disabled {
 }
 
 #dashboardSearchInput {
-    min-height: 50px;
-    padding: 0 17px;
-    background-color: #fffdf8;
-    border-radius: 12px;
+    min-height: 48px;
+    padding: 0 16px;
+    background-color: #fffdf7;
+    border: 1px solid #d4b58d;
+    border-radius: 10px;
     font-size: 14px;
 }
 
@@ -692,22 +728,22 @@ QComboBox:disabled {
 }
 
 QPushButton {
-    min-height: 38px;
+    min-height: 44px;
     padding: 0 16px;
-    color: #3f4b58;
-    background-color: #fffdf8;
+    color: #2c2c2c;
+    background-color: #f1e2cd;
     border: 1px solid #d8ccbc;
-    border-radius: 8px;
-    font-weight: 550;
+    border-radius: 10px;
+    font-weight: 500;
 }
 
 QPushButton:hover {
-    background-color: #f6efe5;
-    border-color: #baa991;
+    background-color: #e7d0ae;
+    border-color: #c5964e;
 }
 
 QPushButton:pressed {
-    background-color: #eee3d5;
+    background-color: #dcc49f;
 }
 
 QPushButton:focus {
@@ -722,56 +758,56 @@ QPushButton:disabled {
 
 #primaryButton,
 #dashboardSearchButton {
-    min-height: 40px;
-    color: #fffdf8;
-    background-color: #14243a;
-    border: 1px solid #14243a;
-    font-weight: 650;
+    min-height: 44px;
+    color: #ffffff;
+    background-color: #3f5f45;
+    border: 1px solid #3f5f45;
+    font-weight: 600;
 }
 
 #dashboardSearchButton {
     min-width: 108px;
-    min-height: 50px;
-    padding: 0 25px;
-    border-radius: 12px;
+    min-height: 48px;
+    padding: 0 24px;
+    border-radius: 10px;
 }
 
 #primaryButton:hover,
 #dashboardSearchButton:hover {
-    background-color: #20364f;
-    border-color: #20364f;
+    background-color: #4f7355;
+    border-color: #4f7355;
 }
 
 #primaryButton:pressed,
 #dashboardSearchButton:pressed {
-    background-color: #0f1b2d;
-    border-color: #0f1b2d;
+    background-color: #314b36;
+    border-color: #314b36;
 }
 
 #primaryButton:focus,
 #dashboardSearchButton:focus {
-    border: 2px solid #e6b85c;
+    border: 2px solid #e0b66f;
 }
 
 #secondaryButton {
     min-width: 104px;
-    color: #495767;
-    background-color: #fffdf8;
-    border-color: #cfc0ad;
+    color: #2c2c2c;
+    background-color: #f1e2cd;
+    border-color: #d9bd98;
 }
 
 #tableActionButton,
 #dangerButton {
     min-width: 52px;
     min-height: 32px;
-    padding: 0 7px;
+    padding: 0 2px;
     font-size: 13px;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 #tableActionButton {
     color: #52755b;
-    background-color: #fbfdf9;
+    background-color: #fffdf7;
     border: 1px solid #bfd0bf;
 }
 
@@ -783,7 +819,7 @@ QPushButton:disabled {
 
 #dangerButton {
     color: #b64f45;
-    background-color: #fffaf7;
+    background-color: #fffdf7;
     border: 1px solid #e6bbb4;
 }
 
@@ -800,39 +836,39 @@ QPushButton:disabled {
 
 /* 表格 */
 #bookTable {
-    color: #293949;
-    background-color: #fffdf8;
-    alternate-background-color: #fbf7ef;
+    color: #2c2c2c;
+    background-color: #fffdf7;
+    alternate-background-color: #faf6ed;
     border: none;
     border-radius: 12px;
-    selection-color: #243447;
+    selection-color: #3f352d;
     selection-background-color: #e8efdf;
     outline: none;
 }
 
 #bookTable::item {
-    padding: 8px 6px;
+    padding: 8px;
     border-bottom: 1px solid #eee6da;
 }
 
 #bookTable::item:hover {
-    background-color: #f6efdf;
+    background-color: #f4eadb;
 }
 
 #bookTable::item:selected {
-    color: #243447;
-    background-color: #e8efdf;
+    color: #3f352d;
+    background-color: #e5edda;
 }
 
 QHeaderView::section {
     min-height: 44px;
-    padding: 0 6px;
-    color: #71695f;
-    background-color: #f1e9dc;
+    padding: 0 8px;
+    color: #6b6b6b;
+    background-color: #eee3d3;
     border: none;
     border-bottom: 1px solid #ddcfbd;
     font-size: 13px;
-    font-weight: 650;
+    font-weight: 600;
 }
 
 #availableBadge,
@@ -858,31 +894,31 @@ QHeaderView::section {
 }
 
 #emptyState {
-    background-color: #fffdf8;
+    background-color: #fffdf7;
     border-radius: 12px;
 }
 
 #emptyTitle {
-    color: #344455;
-    font-size: 17px;
-    font-weight: 650;
+    color: #2c2c2c;
+    font-size: 18px;
+    font-weight: 500;
 }
 
 #emptyDescription,
 #fieldHelper {
-    color: #817a70;
+    color: #6b6b6b;
     font-size: 12px;
 }
 
 /* 弹窗与状态栏 */
 #dialogTitle {
-    color: #1f2d3d;
+    color: #2c2c2c;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 #bookDialog QLabel {
-    color: #3f4a55;
+    color: #2c2c2c;
 }
 
 #dialogSeparator {
@@ -901,9 +937,9 @@ QDialogButtonBox QPushButton {
 }
 
 #appStatusBar {
-    color: #665f57;
-    background-color: #fbf7ef;
-    border-top: 1px solid #dfd4c5;
+    color: #6b6b6b;
+    background-color: #f8f1e6;
+    border-top: 1px solid #d9c8b2;
     font-size: 13px;
 }
 
