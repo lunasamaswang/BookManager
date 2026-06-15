@@ -727,6 +727,28 @@ QComboBox:disabled {
     padding-left: 8px;
 }
 
+#libraryFilter {
+    color: #2c2c2c;
+    background-color: #fffdf7;
+    border: 1px solid #d8ccbc;
+}
+
+#libraryFilter:hover {
+    border-color: #c5964e;
+}
+
+#libraryFilter:focus {
+    border: 1px solid #c5964e;
+}
+
+#libraryFilter QAbstractItemView {
+    color: #2c2c2c;
+    background-color: #fffdf7;
+    border: 1px solid #d8ccbc;
+    selection-color: #2c2c2c;
+    selection-background-color: #f1e2cd;
+}
+
 QPushButton {
     min-height: 44px;
     padding: 0 16px;
@@ -812,9 +834,15 @@ QPushButton:disabled {
 }
 
 #tableActionButton:hover {
+    color: #3f684a;
+    background-color: #edf7ef;
+    border-color: #8eb69a;
+}
+
+#tableActionButton:pressed {
     color: #ffffff;
-    background-color: #5f8d6a;
-    border-color: #5f8d6a;
+    background-color: #527d5d;
+    border-color: #527d5d;
 }
 
 #dangerButton {
@@ -824,12 +852,13 @@ QPushButton:disabled {
 }
 
 #dangerButton:hover {
-    color: #ffffff;
-    background-color: #c85a4f;
-    border-color: #c85a4f;
+    color: #a8443b;
+    background-color: #fff0ed;
+    border-color: #d98c82;
 }
 
 #dangerButton:pressed {
+    color: #ffffff;
     background-color: #a8443b;
     border-color: #a8443b;
 }
@@ -841,23 +870,29 @@ QPushButton:disabled {
     alternate-background-color: #faf6ed;
     border: none;
     border-radius: 12px;
-    selection-color: #3f352d;
-    selection-background-color: #e8efdf;
+    selection-color: #263746;
+    selection-background-color: #e8f3ff;
     outline: none;
+    font-size: 13px;
 }
 
 #bookTable::item {
-    padding: 8px;
+    padding: 7px 8px;
     border-bottom: 1px solid #eee6da;
 }
 
 #bookTable::item:hover {
-    background-color: #f4eadb;
+    background-color: #f6f9ff;
 }
 
 #bookTable::item:selected {
-    color: #3f352d;
-    background-color: #e5edda;
+    color: #263746;
+    background-color: #e8f3ff;
+}
+
+#bookTable::item:selected:hover {
+    color: #263746;
+    background-color: #e8f3ff;
 }
 
 QHeaderView::section {

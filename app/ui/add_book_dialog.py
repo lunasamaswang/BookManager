@@ -12,7 +12,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from app.services.book_service import DuplicateNfcError, add_book, update_book
+from app.services.book_service import (
+    DuplicateNfcError,
+    add_book,
+    get_categories,
+    get_locations,
+    update_book,
+)
 
 
 class AddBookDialog(QDialog):
@@ -58,11 +64,19 @@ class AddBookDialog(QDialog):
         self.author_input = QLineEdit()
         self.author_input.setPlaceholderText("请输入作者")
 
-        self.category_input = QLineEdit()
-        self.category_input.setPlaceholderText("例如：文学、计算机")
+        self.category_input = self.create_editable_combo(
+            get_categories(),
+            "例如：文学、计算机",
+        )
 
-        self.location_input = QLineEdit()
-        self.location_input.setPlaceholderText("例如：书房 A1")
+        self.location_input = self.create_editable_combo(
+            get_locations(),
+            "例如：书房 A1",
+        )
+
+        if not self.book:
+            self.set_combo_value(self.category_input, "未分类")
+            self.set_combo_value(self.location_input, "未设置")
 
         self.status_input = QComboBox()
         self.status_input.addItems(["未借出", "已借出"])
@@ -117,6 +131,21 @@ class AddBookDialog(QDialog):
         self.setTabOrder(self.location_input, self.status_input)
         self.title_input.setFocus()
 
+    def create_editable_combo(self, values, placeholder):
+        """创建可选择已有值、也可以输入新值的下拉框。"""
+        combo = QComboBox()
+        combo.setEditable(True)
+        combo.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        combo.addItems(values)
+        combo.lineEdit().setPlaceholderText(placeholder)
+        return combo
+
+    def set_combo_value(self, combo, value):
+        """设置下拉框当前值，并保留不在选项中的历史值。"""
+        if value and combo.findText(value) < 0:
+            combo.addItem(value)
+        combo.setCurrentText(value)
+
     def create_required_label(self, text):
         """创建带红色星号的必填字段标签。"""
         label = QLabel(f"{text} <span style='color:#D92D20'>*</span>")
@@ -128,8 +157,14 @@ class AddBookDialog(QDialog):
         self.nfc_input.setText(self.book.get("nfc_id") or "")
         self.title_input.setText(self.book.get("title") or "")
         self.author_input.setText(self.book.get("author") or "")
-        self.category_input.setText(self.book.get("category") or "")
-        self.location_input.setText(self.book.get("location") or "")
+        self.set_combo_value(
+            self.category_input,
+            self.book.get("category") or "",
+        )
+        self.set_combo_value(
+            self.location_input,
+            self.book.get("location") or "",
+        )
 
         status = self.book.get("status") or "未借出"
         status_index = self.status_input.findText(status)
@@ -143,13 +178,35 @@ class AddBookDialog(QDialog):
             self.title_input.setFocus()
             return
 
+        category = self.category_input.currentText().strip()
+        if category == "全部分类":
+            QMessageBox.warning(
+                self,
+                "无法保存",
+                "分类不能使用“全部分类”，请填写具体分类或保留“未分类”。",
+            )
+            self.category_input.setFocus()
+            self.category_input.lineEdit().selectAll()
+            return
+
+        location = self.location_input.currentText().strip()
+        if location == "全部位置":
+            QMessageBox.warning(
+                self,
+                "无法保存",
+                "位置不能使用“全部位置”，请填写具体位置或保留“未设置”。",
+            )
+            self.location_input.setFocus()
+            self.location_input.lineEdit().selectAll()
+            return
+
         try:
             book_data = {
                 "nfc_id": self.nfc_input.text(),
                 "title": self.title_input.text(),
                 "author": self.author_input.text(),
-                "category": self.category_input.text(),
-                "location": self.location_input.text(),
+                "category": category,
+                "location": location,
                 "status": self.status_input.currentText(),
             }
 

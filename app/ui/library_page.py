@@ -1,9 +1,10 @@
 from pathlib import Path
 
-from PySide6.QtCore import QEvent, QTimer, Signal, Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import QEvent, QSignalBlocker, QTimer, Signal, Qt
+from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QComboBox,
     QFileDialog,
     QFrame,
     QHeaderView,
@@ -13,6 +14,8 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QSizePolicy,
+    QStyledItemDelegate,
+    QStyle,
     QStackedLayout,
     QTableWidget,
     QTableWidgetItem,
@@ -20,12 +23,37 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from app.services.book_service import delete_book, get_book, get_books
+from app.services.book_service import (
+    delete_book,
+    get_book,
+    get_books,
+    get_categories,
+    get_locations,
+)
 from app.services.import_service import ExcelImportError, import_books_from_excel
 from app.ui.add_book_dialog import AddBookDialog
 
 
 ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
+
+
+class BookTableDelegate(QStyledItemDelegate):
+    """为图书表格绘制整行悬停背景。"""
+
+    def paint(self, painter, option, index):
+        styled_option = option
+        table = self.parent()
+        is_selected = bool(option.state & QStyle.StateFlag.State_Selected)
+
+        if table and index.row() == table.property("hoveredRow") and not is_selected:
+            painter.save()
+            painter.fillRect(option.rect, QColor("#F6F9FF"))
+            painter.restore()
+
+            styled_option = option.__class__(option)
+            styled_option.state &= ~QStyle.StateFlag.State_MouseOver
+
+        super().paint(painter, styled_option, index)
 
 
 class LibraryPage(QWidget):
@@ -34,17 +62,9 @@ class LibraryPage(QWidget):
     books_changed = Signal()
     success_message = Signal(str)
 
-    # 常见窗口宽度下优先保证操作列完整，其余列按可用空间伸缩。
-    MIN_COLUMN_WIDTHS = [48, 74, 84, 48, 52, 58, 68, 72, 152]
-    COLUMN_GROWTH_LIMITS = [
-        (2, 80),  # 书名优先获得空间
-        (5, 34),  # 存放位置
-        (7, 48),  # 添加时间
-        (1, 24),  # NFC 编号
-        (3, 28),  # 作者
-        (4, 16),  # 分类
-        (6, 12),  # 状态
-    ]
+    # 各列按权重分配可用空间，并保留保证文字可读的最小宽度。
+    COLUMN_WEIGHTS = [0.6, 1.2, 3.5, 1.2, 1.0, 1.6, 1.0, 1.8, 2.2]
+    MIN_COLUMN_WIDTHS = [40, 65, 80, 50, 50, 65, 55, 85, 180]
 
     TABLE_COLUMNS = [
         ("id", "编号"),
@@ -62,6 +82,7 @@ class LibraryPage(QWidget):
         super().__init__(parent)
         self.setObjectName("libraryPage")
         self.setup_ui()
+        self.refresh_filter_options()
         self.load_books()
 
     def setup_ui(self):
@@ -116,9 +137,28 @@ class LibraryPage(QWidget):
         )
         self.search_input.textChanged.connect(self.load_books)
 
+        self.category_filter = QComboBox()
+        self.category_filter.setObjectName("libraryFilter")
+        self.category_filter.setMinimumWidth(120)
+        self.category_filter.setMaximumWidth(160)
+        self.category_filter.currentTextChanged.connect(
+            lambda _text: self.load_books()
+        )
+
+        self.location_filter = QComboBox()
+        self.location_filter.setObjectName("libraryFilter")
+        self.location_filter.setMinimumWidth(120)
+        self.location_filter.setMaximumWidth(160)
+        self.location_filter.currentTextChanged.connect(
+            lambda _text: self.load_books()
+        )
+
         search_layout = QHBoxLayout()
         search_layout.setContentsMargins(16, 12, 16, 12)
+        search_layout.setSpacing(12)
         search_layout.addWidget(self.search_input)
+        search_layout.addWidget(self.category_filter)
+        search_layout.addWidget(self.location_filter)
         search_layout.addStretch()
 
         search_panel = QFrame()
@@ -161,6 +201,9 @@ class LibraryPage(QWidget):
         table.setAlternatingRowColors(False)
         table.setShowGrid(False)
         table.setWordWrap(False)
+        table.setMouseTracking(True)
+        table.setProperty("hoveredRow", -1)
+        table.setItemDelegate(BookTableDelegate(table))
         table.setHorizontalScrollMode(
             QAbstractItemView.ScrollMode.ScrollPerPixel
         )
@@ -171,14 +214,17 @@ class LibraryPage(QWidget):
             QAbstractItemView.ScrollMode.ScrollPerPixel
         )
         table.setTextElideMode(Qt.TextElideMode.ElideRight)
-        table.verticalHeader().setVisible(False)
-        table.verticalHeader().setDefaultSectionSize(52)
+        vertical_header = table.verticalHeader()
+        vertical_header.setVisible(False)
+        vertical_header.setMinimumSectionSize(52)
+        vertical_header.setDefaultSectionSize(52)
+        vertical_header.setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
         header = table.horizontalHeader()
         header.setDefaultAlignment(
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         )
-        header.setMinimumSectionSize(48)
+        header.setMinimumSectionSize(40)
         header.setStretchLastSection(False)
         header.setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
@@ -187,13 +233,18 @@ class LibraryPage(QWidget):
         return table
 
     def eventFilter(self, watched, event):
-        """表格可视区域变化后重新计算列宽，避免最右侧操作列被裁切。"""
-        if (
-            hasattr(self, "book_table")
-            and watched is self.book_table.viewport()
-            and event.type() == QEvent.Type.Resize
-        ):
-            QTimer.singleShot(0, self.update_table_column_widths)
+        """处理表格尺寸变化和整行悬停反馈。"""
+        if hasattr(self, "book_table") and watched is self.book_table.viewport():
+            if event.type() == QEvent.Type.Resize:
+                QTimer.singleShot(0, self.update_table_column_widths)
+            elif event.type() == QEvent.Type.MouseMove:
+                hovered_row = self.book_table.indexAt(event.position().toPoint()).row()
+                if hovered_row != self.book_table.property("hoveredRow"):
+                    self.book_table.setProperty("hoveredRow", hovered_row)
+                    self.book_table.viewport().update()
+            elif event.type() == QEvent.Type.Leave:
+                self.book_table.setProperty("hoveredRow", -1)
+                self.book_table.viewport().update()
         return super().eventFilter(watched, event)
 
     def resizeEvent(self, event):
@@ -202,27 +253,39 @@ class LibraryPage(QWidget):
         QTimer.singleShot(0, self.update_table_column_widths)
 
     def update_table_column_widths(self):
-        """按表格可视宽度分配列宽，并始终保留完整操作列。"""
+        """根据表格可视宽度和列权重动态分配列宽。"""
         viewport_width = self.book_table.viewport().width()
         if viewport_width <= 0:
             return
 
-        widths = self.MIN_COLUMN_WIDTHS.copy()
-        minimum_total = sum(widths)
-        target_width = max(viewport_width, minimum_total)
-        remaining = target_width - minimum_total
+        minimum_total = sum(self.MIN_COLUMN_WIDTHS)
+        available_width = max(viewport_width, minimum_total)
+        extra_width = available_width - minimum_total
+        total_weight = sum(self.COLUMN_WEIGHTS)
 
-        for column, growth_limit in self.COLUMN_GROWTH_LIMITS:
-            growth = min(remaining, growth_limit)
-            widths[column] += growth
-            remaining -= growth
-            if remaining == 0:
-                break
+        raw_growth = [
+            extra_width * weight / total_weight
+            for weight in self.COLUMN_WEIGHTS
+        ]
+        growth = [int(value) for value in raw_growth]
 
-        # 更宽的窗口把剩余空间继续交给书名列。
-        if remaining > 0:
-            widths[2] += remaining
+        # 把取整后的剩余像素交给小数部分最大的列，保证总宽度稳定。
+        remaining_pixels = extra_width - sum(growth)
+        growth_order = sorted(
+            range(len(raw_growth)),
+            key=lambda column: raw_growth[column] - growth[column],
+            reverse=True,
+        )
+        for column in growth_order[:remaining_pixels]:
+            growth[column] += 1
 
+        widths = [
+            minimum_width + column_growth
+            for minimum_width, column_growth in zip(
+                self.MIN_COLUMN_WIDTHS,
+                growth,
+            )
+        ]
         for column, width in enumerate(widths):
             self.book_table.setColumnWidth(column, width)
 
@@ -256,20 +319,51 @@ class LibraryPage(QWidget):
         if not keyword_changed:
             self.load_books(keyword)
 
+    def refresh_filter_options(self):
+        """刷新分类和位置选项，并尽量保留当前筛选条件。"""
+        self.refresh_filter_combo(
+            self.category_filter,
+            "全部分类",
+            get_categories(),
+        )
+        self.refresh_filter_combo(
+            self.location_filter,
+            "全部位置",
+            get_locations(),
+        )
+
+    def refresh_filter_combo(self, combo, default_text, values):
+        """在不触发重复查询的情况下更新一个筛选下拉框。"""
+        current_text = combo.currentText() or default_text
+        blocker = QSignalBlocker(combo)
+        combo.clear()
+        combo.addItem(default_text)
+        combo.addItems(values)
+
+        current_index = combo.findText(current_text)
+        combo.setCurrentIndex(current_index if current_index >= 0 else 0)
+        del blocker
+
     def load_books(self, keyword=None):
         """读取数据库中的图书，并刷新表格内容。"""
         if keyword is None:
             keyword = self.search_input.text()
 
-        books = get_books(keyword)
+        books = get_books(
+            keyword,
+            self.category_filter.currentText(),
+            self.location_filter.currentText(),
+        )
+        books = sorted(books, key=lambda book: book["id"])
         self.book_count_label.setText(f"共 {len(books)} 本图书")
         self.book_table.setRowCount(len(books))
 
-        for row_index, book in enumerate(books):
+        for row_index, book in enumerate(books, start=1):
+            table_row = row_index - 1
             for column_index, (field_name, _) in enumerate(self.TABLE_COLUMNS):
                 if field_name == "actions":
                     self.book_table.setCellWidget(
-                        row_index,
+                        table_row,
                         column_index,
                         self.create_action_buttons(book["id"]),
                     )
@@ -277,22 +371,28 @@ class LibraryPage(QWidget):
 
                 if field_name == "status":
                     self.book_table.setCellWidget(
-                        row_index,
+                        table_row,
                         column_index,
                         self.create_status_badge(book.get("status") or "未借出"),
                     )
                     continue
 
-                value = book.get(field_name)
+                value = row_index if field_name == "id" else book.get(field_name)
                 text = "" if value is None else str(value)
                 item = QTableWidgetItem(text)
                 item.setToolTip(text)
-                item.setTextAlignment(
-                    Qt.AlignmentFlag.AlignCenter
-                    if field_name == "id"
-                    else Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-                )
-                self.book_table.setItem(row_index, column_index, item)
+                if field_name in {"id", "nfc_id", "created_at"}:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                else:
+                    item.setTextAlignment(
+                        Qt.AlignmentFlag.AlignLeft
+                        | Qt.AlignmentFlag.AlignVCenter
+                    )
+                if field_name == "title":
+                    title_font = item.font()
+                    title_font.setBold(True)
+                    item.setFont(title_font)
+                self.book_table.setItem(table_row, column_index, item)
 
         if books:
             self.table_stack.setCurrentWidget(self.book_table)
@@ -312,7 +412,7 @@ class LibraryPage(QWidget):
         """创建带文字的状态徽标。"""
         widget = QWidget()
         layout = QHBoxLayout(widget)
-        layout.setContentsMargins(6, 8, 6, 8)
+        layout.setContentsMargins(6, 0, 6, 0)
 
         label = QLabel(status)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -327,7 +427,7 @@ class LibraryPage(QWidget):
         """为每一行创建编辑和删除按钮。"""
         widget = QWidget()
         layout = QHBoxLayout(widget)
-        layout.setContentsMargins(5, 6, 5, 6)
+        layout.setContentsMargins(5, 0, 5, 0)
         layout.setSpacing(6)
 
         edit_button = QPushButton("编辑")
@@ -352,6 +452,7 @@ class LibraryPage(QWidget):
 
     def notify_books_changed(self, message):
         """刷新页面，并通知主窗口更新首页和状态栏。"""
+        self.refresh_filter_options()
         self.load_books()
         self.books_changed.emit()
         self.success_message.emit(message)
@@ -379,6 +480,7 @@ class LibraryPage(QWidget):
             QMessageBox.warning(self, "导入失败", str(error))
             return
 
+        self.refresh_filter_options()
         self.load_books()
         self.books_changed.emit()
 
