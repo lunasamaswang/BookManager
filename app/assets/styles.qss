@@ -956,6 +956,45 @@ QHeaderView::section {
     color: #2c2c2c;
 }
 
+#bookDetailDialog {
+    background-color: #f8f1e6;
+}
+
+#detailSubtitle {
+    color: #8a8378;
+    font-size: 12px;
+}
+
+#detailBookTitle {
+    color: #243447;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+#detailSection {
+    background-color: #fffdf7;
+    border: 1px solid #e5dacb;
+    border-radius: 12px;
+}
+
+#detailSectionTitle {
+    color: #52755b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#detailFieldLabel {
+    min-width: 76px;
+    color: #8a8378;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+#detailFieldValue {
+    color: #2c2c2c;
+    font-size: 14px;
+}
+
 #dialogSeparator {
     color: #ded3c5;
     background-color: #ded3c5;

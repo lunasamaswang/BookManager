@@ -32,6 +32,7 @@ from app.services.book_service import (
 )
 from app.services.import_service import ExcelImportError, import_books_from_excel
 from app.ui.add_book_dialog import AddBookDialog
+from app.ui.book_detail_dialog import BookDetailDialog
 
 
 ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
@@ -195,6 +196,7 @@ class LibraryPage(QWidget):
         table.setHorizontalHeaderLabels(
             [column_title for _, column_title in self.TABLE_COLUMNS]
         )
+        table.itemDoubleClicked.connect(self.open_book_detail)
         table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
@@ -381,6 +383,7 @@ class LibraryPage(QWidget):
                 text = "" if value is None else str(value)
                 item = QTableWidgetItem(text)
                 item.setToolTip(text)
+                item.setData(Qt.ItemDataRole.UserRole, book["id"])
                 if field_name in {"id", "nfc_id", "created_at"}:
                     item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 else:
@@ -449,6 +452,26 @@ class LibraryPage(QWidget):
         layout.addWidget(edit_button)
         layout.addWidget(delete_button)
         return widget
+
+    def open_book_detail(self, item):
+        """双击普通数据列时打开只读图书详情。"""
+        if item.column() in {6, 8}:
+            return
+
+        book_id = item.data(Qt.ItemDataRole.UserRole)
+        if book_id is None:
+            return
+
+        book = get_book(book_id)
+        if not book:
+            QMessageBox.warning(self, "无法查看", "这本图书已不存在。")
+            self.load_books()
+            return
+
+        dialog = BookDetailDialog(book, self)
+        dialog.exec()
+        if dialog.edit_requested:
+            self.open_edit_dialog(book_id)
 
     def notify_books_changed(self, message):
         """刷新页面，并通知主窗口更新首页和状态栏。"""
