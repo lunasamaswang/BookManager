@@ -25,7 +25,31 @@ def validate_category_and_location(category, location):
     return clean_category, clean_location
 
 
-def add_book(nfc_id, title, author, category, location, status="未借出"):
+def clean_reading_status(reading_status):
+    """清理阅读状态，空值统一视为未读。"""
+    return str(reading_status or "").strip() or "未读"
+
+
+def clean_rating(rating):
+    """把评分转换为 0 到 5 之间的整数。"""
+    try:
+        value = int(rating)
+    except (TypeError, ValueError):
+        value = 0
+
+    return max(0, min(value, 5))
+
+
+def add_book(
+    nfc_id,
+    title,
+    author,
+    category,
+    location,
+    status="未借出",
+    reading_status="未读",
+    rating=0,
+):
     """添加一本图书，并返回新记录的编号。"""
     clean_title = title.strip()
     if not clean_title:
@@ -36,6 +60,8 @@ def add_book(nfc_id, title, author, category, location, status="未借出"):
         category,
         location,
     )
+    clean_reading_status_value = clean_reading_status(reading_status)
+    clean_rating_value = clean_rating(rating)
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     try:
@@ -43,8 +69,9 @@ def add_book(nfc_id, title, author, category, location, status="未借出"):
             cursor = connection.execute(
                 """
                 INSERT INTO books
-                    (nfc_id, title, author, category, location, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (nfc_id, title, author, category, location, status,
+                     reading_status, rating, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     clean_nfc_id,
@@ -53,6 +80,8 @@ def add_book(nfc_id, title, author, category, location, status="未借出"):
                     clean_category,
                     clean_location,
                     status.strip() or "未借出",
+                    clean_reading_status_value,
+                    clean_rating_value,
                     created_at,
                 ),
             )
@@ -90,7 +119,8 @@ def get_books(keyword="", category="", location=""):
     with get_connection() as connection:
         rows = connection.execute(
             f"""
-            SELECT id, nfc_id, title, author, category, location, status, created_at
+            SELECT id, nfc_id, title, author, category, location, status,
+                   reading_status, rating, created_at
             FROM books
             {where_clause}
             ORDER BY id DESC
@@ -159,7 +189,8 @@ def get_recent_books(limit=5):
     with get_connection() as connection:
         rows = connection.execute(
             """
-            SELECT id, nfc_id, title, author, category, location, status, created_at
+            SELECT id, nfc_id, title, author, category, location, status,
+                   reading_status, rating, created_at
             FROM books
             ORDER BY id DESC
             LIMIT ?
@@ -175,7 +206,8 @@ def get_book(book_id):
     with get_connection() as connection:
         row = connection.execute(
             """
-            SELECT id, nfc_id, title, author, category, location, status, created_at
+            SELECT id, nfc_id, title, author, category, location, status,
+                   reading_status, rating, created_at
             FROM books
             WHERE id = ?
             """,
@@ -185,7 +217,17 @@ def get_book(book_id):
     return dict(row) if row else None
 
 
-def update_book(book_id, nfc_id, title, author, category, location, status):
+def update_book(
+    book_id,
+    nfc_id,
+    title,
+    author,
+    category,
+    location,
+    status,
+    reading_status="未读",
+    rating=0,
+):
     """更新一本图书的信息，并返回是否更新成功。"""
     clean_title = title.strip()
     if not clean_title:
@@ -196,6 +238,8 @@ def update_book(book_id, nfc_id, title, author, category, location, status):
         category,
         location,
     )
+    clean_reading_status_value = clean_reading_status(reading_status)
+    clean_rating_value = clean_rating(rating)
 
     try:
         with get_connection() as connection:
@@ -203,7 +247,7 @@ def update_book(book_id, nfc_id, title, author, category, location, status):
                 """
                 UPDATE books
                 SET nfc_id = ?, title = ?, author = ?, category = ?,
-                    location = ?, status = ?
+                    location = ?, status = ?, reading_status = ?, rating = ?
                 WHERE id = ?
                 """,
                 (
@@ -213,6 +257,8 @@ def update_book(book_id, nfc_id, title, author, category, location, status):
                     clean_category,
                     clean_location,
                     status.strip() or "未借出",
+                    clean_reading_status_value,
+                    clean_rating_value,
                     book_id,
                 ),
             )

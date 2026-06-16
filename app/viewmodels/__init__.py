@@ -6,10 +6,14 @@ from app.viewmodels.book_view_model import (
     DetailField,
     DetailSection,
 )
+from app.viewmodels.rating_view_model import RatingViewModel
+from app.viewmodels.reading_status_model import ReadingStatusModel
 
 __all__ = [
     "BookViewModel",
     "BookStatusModel",
+    "ReadingStatusModel",
+    "RatingViewModel",
     "DetailField",
     "DetailSection",
 ]

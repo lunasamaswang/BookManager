@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
 from app.viewmodels.book_status_model import BookStatusModel
+from app.viewmodels.rating_view_model import RatingViewModel
+from app.viewmodels.reading_status_model import ReadingStatusModel
 
 
 def format_text(value, empty_text="未填写"):
@@ -40,11 +42,14 @@ class BookViewModel:
     category: str
     location: str
     status: BookStatusModel
+    reading_status: ReadingStatusModel
+    rating: RatingViewModel
     nfc_id: str
     created_at: str
     basic_info: DetailSection
     location_info: DetailSection
     status_info: DetailSection
+    reading_info: DetailSection
     meta_info: DetailSection
     sections: tuple[DetailSection, ...]
 
@@ -56,6 +61,8 @@ class BookViewModel:
         category = format_text(book.get("category"))
         location = format_text(book.get("location"))
         status = BookStatusModel.from_value(book.get("status"))
+        reading_status = ReadingStatusModel.from_value(book.get("reading_status"))
+        rating = RatingViewModel.from_value(book.get("rating"))
         nfc_id = format_text(book.get("nfc_id"), "未绑定")
         created_at = format_text(book.get("created_at"))
 
@@ -81,6 +88,14 @@ class BookViewModel:
                 DetailField("status", "当前状态", status.label),
             ),
         )
+        reading_info = DetailSection(
+            key="reading_info",
+            title="阅读信息",
+            fields=(
+                DetailField("reading_status", "阅读状态", reading_status.label),
+                DetailField("rating", "我的评分", rating.label),
+            ),
+        )
         meta_info = DetailSection(
             key="meta_info",
             title="NFC 信息",
@@ -97,16 +112,20 @@ class BookViewModel:
             category=category,
             location=location,
             status=status,
+            reading_status=reading_status,
+            rating=rating,
             nfc_id=nfc_id,
             created_at=created_at,
             basic_info=basic_info,
             location_info=location_info,
             status_info=status_info,
+            reading_info=reading_info,
             meta_info=meta_info,
             sections=(
                 basic_info,
                 location_info,
                 status_info,
+                reading_info,
                 meta_info,
             ),
         )

@@ -21,6 +21,17 @@ from app.services.book_service import (
 )
 
 
+READING_STATUS_OPTIONS = ["未读", "想读", "在读", "已读", "暂停", "弃读"]
+RATING_OPTIONS = [
+    ("未评分", 0),
+    ("1 分", 1),
+    ("2 分", 2),
+    ("3 分", 3),
+    ("4 分", 4),
+    ("5 分", 5),
+]
+
+
 class AddBookDialog(QDialog):
     """用于添加或编辑图书信息的弹窗。"""
 
@@ -81,6 +92,13 @@ class AddBookDialog(QDialog):
         self.status_input = QComboBox()
         self.status_input.addItems(["未借出", "已借出"])
 
+        self.reading_status_input = QComboBox()
+        self.reading_status_input.addItems(READING_STATUS_OPTIONS)
+
+        self.rating_input = QComboBox()
+        for label, value in RATING_OPTIONS:
+            self.rating_input.addItem(label, value)
+
         form_layout = QFormLayout()
         form_layout.setObjectName("bookForm")
         form_layout.setContentsMargins(0, 0, 0, 0)
@@ -96,6 +114,8 @@ class AddBookDialog(QDialog):
         form_layout.addRow("分类", self.category_input)
         form_layout.addRow("存放位置", self.location_input)
         form_layout.addRow("状态", self.status_input)
+        form_layout.addRow("阅读状态", self.reading_status_input)
+        form_layout.addRow("评分", self.rating_input)
 
         separator = QFrame()
         separator.setObjectName("dialogSeparator")
@@ -129,6 +149,8 @@ class AddBookDialog(QDialog):
         self.setTabOrder(self.author_input, self.category_input)
         self.setTabOrder(self.category_input, self.location_input)
         self.setTabOrder(self.location_input, self.status_input)
+        self.setTabOrder(self.status_input, self.reading_status_input)
+        self.setTabOrder(self.reading_status_input, self.rating_input)
         self.title_input.setFocus()
 
     def create_editable_combo(self, values, placeholder):
@@ -171,6 +193,31 @@ class AddBookDialog(QDialog):
         if status_index >= 0:
             self.status_input.setCurrentIndex(status_index)
 
+        reading_status = (self.book.get("reading_status") or "").strip() or "未读"
+        reading_status_index = self.reading_status_input.findText(reading_status)
+        if reading_status_index >= 0:
+            self.reading_status_input.setCurrentIndex(reading_status_index)
+        else:
+            # 保留旧库里可能存在的未知阅读状态，避免编辑时意外覆盖用户数据。
+            self.reading_status_input.addItem(reading_status)
+            self.reading_status_input.setCurrentText(reading_status)
+
+        self.set_rating_value(self.book.get("rating"))
+
+    def set_rating_value(self, rating):
+        """根据数据库里的评分值回填评分下拉框。"""
+        try:
+            rating_value = int(rating)
+        except (TypeError, ValueError):
+            rating_value = 0
+
+        if rating_value < 0 or rating_value > 5:
+            rating_value = 0
+
+        index = self.rating_input.findData(rating_value)
+        if index >= 0:
+            self.rating_input.setCurrentIndex(index)
+
     def save_book(self):
         """校验表单并把图书保存到数据库。"""
         if not self.title_input.text().strip():
@@ -208,6 +255,8 @@ class AddBookDialog(QDialog):
                 "category": category,
                 "location": location,
                 "status": self.status_input.currentText(),
+                "reading_status": self.reading_status_input.currentText(),
+                "rating": self.rating_input.currentData(),
             }
 
             if self.book:
